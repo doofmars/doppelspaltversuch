@@ -7,11 +7,13 @@
 
 // ── Constants ────────────────────────────────────────────────
 
-const SUPPORTED_LANGS = ['de', 'en'];
-const MAX_HITS        = 50000; // cap stored hits to prevent memory issues
-const HITS_TRIM       = 5000;  // how many to remove when cap is reached
-const GLOW_ALPHA      = 0x55;  // outer glow transparency (0–255)
-const CORE_ALPHA      = 0xFF;  // bright core transparency (0–255)
+const SUPPORTED_LANGS  = ['de', 'en'];
+const MAX_HITS         = 50000; // cap stored hits to prevent memory issues
+const HITS_TRIM        = 5000;  // how many to remove when cap is reached
+const GLOW_ALPHA       = 0x55;  // outer glow transparency (0–255)
+const CORE_ALPHA       = 0xFF;  // bright core transparency (0–255)
+const INTENSITY_SCALE  = 2.0;   // multiplier for screen brightness (>1 = brighter)
+const SCREEN_WIDTH     = 20;    // visual width of the screen bar in pixels
 
 // ── i18n ─────────────────────────────────────────────────────
 
@@ -176,7 +178,8 @@ const Sim = {
     sourceFrac: 0.28, // slit x as fraction of canvas width from source
     screenFrac: 0.42, // screen x relative to slit
     particleType: 'electron',
-    speed:      5,    // 1-10
+    speed:      5,    // 1-10  (animation / movement speed)
+    density:    5,    // 1-10  (emission rate, particles per second)
   },
 
   init(canvas) {
@@ -252,6 +255,7 @@ const Sim = {
   resetScreen() {
     this.hits     = [];
     this.hitCount = 0;
+    this.render();   // re-render immediately so screen clears even when paused
     App.updateParticleCount();
   },
 
@@ -259,7 +263,11 @@ const Sim = {
     if (!this.running) return;
     if (this.dirty) this.rebuildCDF();
 
-    const pps = Math.ceil(this.params.speed * 0.8); // particles per frame
+    // Sub-integer emission via accumulator so density=1 emits ~3 particles/sec
+    this._emitAccum = (this._emitAccum || 0)
+      + (this.params.density * this.params.density) * 0.05;
+    const pps = Math.floor(this._emitAccum);
+    this._emitAccum -= pps;
     for (let i = 0; i < pps; i++) this._spawn();
 
     this._update();
@@ -333,7 +341,8 @@ const Sim = {
   },
 
   _update() {
-    const speed = 2 + this.params.speed * 1.5;
+    // Slower speed range: at min=1 → 1.5 px/frame; at max=10 → 7.8 px/frame
+    const speed = 0.8 + this.params.speed * 0.7;
     const newParticles = [];
 
     for (const p of this.particles) {
@@ -444,11 +453,11 @@ const Sim = {
   _drawScreen() {
     const { ctx, canvas } = this;
     const x  = this.screenX;
-    const sw = 6;
+    const sw = SCREEN_WIDTH;
 
-    // Screen bar background
+    // Screen bar background (wider halo behind the bar)
     ctx.fillStyle = '#1a2730';
-    ctx.fillRect(x - 2, 0, sw + 4, canvas.height);
+    ctx.fillRect(x - 4, 0, sw + 8, canvas.height);
     ctx.fillStyle = '#263238';
     ctx.fillRect(x, 0, sw, canvas.height);
     ctx.strokeStyle = '#37474F';
@@ -457,14 +466,14 @@ const Sim = {
 
     if (this.hits.length === 0) return;
 
-    const pt     = PARTICLES[this.params.particleType];
+    const pt      = PARTICLES[this.params.particleType];
     const isPaint = this.params.particleType === 'paint';
 
     if (isPaint) {
-      // Paint: draw each coloured dot individually
+      // Paint: draw each coloured dot individually across the wider bar
       for (const hit of this.hits) {
         ctx.fillStyle = hit.color;
-        ctx.fillRect(x + 1, Math.round(hit.y), sw - 2, 1);
+        ctx.fillRect(x + 2, Math.round(hit.y), sw - 4, 1);
       }
     } else {
       // Quantum/classical: density-map for clean visualisation
@@ -479,11 +488,12 @@ const Sim = {
       const col = pt.color || '#9E9E9E';
       for (let c = 0; c < numCells; c++) {
         if (counts[c] === 0) continue;
-        const alpha = Math.pow(counts[c] / maxCount, 0.5); // sqrt for visibility
+        // Doubled intensity: sqrt-scale then multiply by INTENSITY_SCALE, clamped to 1
+        const alpha = Math.min(Math.pow(counts[c] / maxCount, 0.5) * INTENSITY_SCALE, 1.0);
         const py    = c * cellH;
-        // Soft glow halo
+        // Soft glow halo (wider than before)
         ctx.fillStyle = col + Math.round(alpha * GLOW_ALPHA).toString(16).padStart(2, '0');
-        ctx.fillRect(x - 5, py, sw + 10, cellH);
+        ctx.fillRect(x - 12, py, sw + 24, cellH);
         // Bright core
         ctx.fillStyle = col + Math.round(alpha * CORE_ALPHA).toString(16).padStart(2, '0');
         ctx.fillRect(x, py, sw, cellH);
@@ -539,7 +549,7 @@ const Sim = {
 
     label(this.sourceX, I18N.t('labels.source'));
     label(this.slitX,   I18N.t('labels.slits'));
-    label(this.screenX + 3, I18N.t('labels.screen'));
+    label(this.screenX + SCREEN_WIDTH / 2, I18N.t('labels.screen'));
   },
 
   _drawGradient() {
@@ -561,14 +571,13 @@ const Sim = {
         for (const sc of this.slitCentres()) {
           intensity += Math.exp(-0.5 * ((py - sc) / sigma) ** 2);
         }
-        const maxI = 1; // already normalised per slit
         intensity = Math.min(intensity, 1);
       } else {
         intensity = Physics.intensity(y, lambda, slitSep, slitWidth, numSlits, L);
       }
       const a = Math.min(intensity * 0.75, 0.75);
       ctx.fillStyle = `rgba(88,166,255,${a.toFixed(3)})`;
-      ctx.fillRect(sx + 7, py, sw, 1);
+      ctx.fillRect(sx + SCREEN_WIDTH + 2, py, sw, 1);
     }
   },
 
@@ -581,7 +590,8 @@ const Sim = {
     const cx      = this.centerY;
     const H       = canvas.height;
     const gw      = 60;
-    const gx      = this.screenX + 34;
+    // graph starts after screen bar + gradient band (24px) + spacing (2px each)
+    const gx      = this.screenX + SCREEN_WIDTH + 28;
 
     // Background
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
@@ -698,7 +708,8 @@ const App = {
       ['slitSep',    v => { Sim.params.slitSep   = +v; Sim.dirty = true; }],
       ['sourceDist', v => { Sim.params.sourceFrac = 0.12 + (+v / 100) * 0.28; }],
       ['screenDist', v => { Sim.params.screenFrac = 0.18 + (+v / 100) * 0.38; Sim.dirty = true; }],
-      ['simSpeed',   v => { Sim.params.speed = +v; }],
+      ['simSpeed',   v => { Sim.params.speed   = +v; }],
+      ['simDensity', v => { Sim.params.density = +v; }],
     ];
     for (const [id, fn] of ranges) {
       const el = document.getElementById(id);
@@ -760,6 +771,10 @@ const App = {
     // speed
     const sp = document.getElementById('simSpeed');
     if (sp) document.getElementById('simSpeedVal').textContent = sp.value;
+
+    // density
+    const den = document.getElementById('simDensity');
+    if (den) document.getElementById('simDensityVal').textContent = den.value;
 
     // Info bar
     const infoEl = document.getElementById('particleInfo');

@@ -13,6 +13,7 @@
   "screenDist": "Slit → Screen",
   "simulation": "Simulation",
   "speed": "Speed",
+  "density": "Emission",
   "play": "▶ Start",
   "pause": "⏸ Pause",
   "reset": "↺ Reset",
