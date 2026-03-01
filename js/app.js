@@ -423,6 +423,9 @@ const Sim = {
     if (document.getElementById('showGradient')?.checked) {
       this._drawGradient();
     }
+    if (document.getElementById('showEvaluation')?.checked) {
+      this._drawEvaluation();
+    }
     if (document.getElementById('showGraph')?.checked) {
       this._drawGraph();
     }
@@ -607,10 +610,13 @@ const Sim = {
     const gw      = 60;
     // graph starts after screen bar + gradient band (24px) + spacing (2px each)
     const gx      = this.screenX + SCREEN_WIDTH + 28;
+    const evaluationOn = document.getElementById('showEvaluation')?.checked;
 
     // Background
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(gx, 0, gw, H);
+    if (!evaluationOn) {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(gx, 0, gw, H);
+    }
 
     // Compute and normalise
     const vals = new Float64Array(H);
@@ -644,6 +650,138 @@ const Sim = {
     ctx.strokeStyle = 'rgba(255,255,255,0.2)';
     ctx.lineWidth   = 1;
     ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+  },
+
+  _drawEvaluation() {
+    const { ctx, canvas } = this;
+    const { numSlits, slitWidth, slitSep, lambda } = this.params;
+    const pt      = PARTICLES[this.params.particleType];
+    const classic = pt.classical || lambda <= 0;
+    const L       = this.L;
+    const cx      = this.centerY;
+    const H       = canvas.height;
+    const ew      = 60; // same width as intensity graph so both overlays can overlap
+    // Position matches graph panel so evaluation and graph can be overlaid
+    const ex      = this.screenX + SCREEN_WIDTH + 28;
+
+    // Background panel
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(ex, 0, ew, H);
+    ctx.strokeStyle = 'rgba(100,200,100,0.4)';
+    ctx.lineWidth   = 1;
+    ctx.strokeRect(ex + 0.5, 0.5, ew - 1, H - 1);
+
+    // Compute experimental distribution from hits
+    const cellH    = 2;
+    const numCells = Math.ceil(H / cellH);
+    const expCounts = new Int32Array(numCells);
+    for (const hit of this.hits) {
+      const c = Math.max(0, Math.min(numCells - 1, Math.floor(hit.y / cellH)));
+      expCounts[c]++;
+    }
+
+    // Compute theoretical distribution
+    const theoryVals = new Float64Array(numCells);
+    let   theorySum  = 0;
+    for (let c = 0; c < numCells; c++) {
+      const py = c * cellH + cellH / 2;
+      const y  = py - cx;
+      let intensity;
+      if (classic) {
+        intensity = 0;
+        const sigma = Math.max(slitWidth * 1.2, 8);
+        for (const sc of this.slitCentres()) {
+          intensity += Math.exp(-0.5 * ((py - sc) / sigma) ** 2);
+        }
+        intensity = Math.min(intensity, 1);
+      } else {
+        intensity = Physics.intensity(y, lambda, slitSep, slitWidth, numSlits, L);
+      }
+      theoryVals[c] = intensity;
+      theorySum += intensity;
+    }
+
+    const totalHits = this.hits.length;
+    if (theorySum <= 0) return;
+
+    // Normalize both curves to probability distributions (stable over time)
+    const expProb    = new Float64Array(numCells);
+    const theoryProb = new Float64Array(numCells);
+    let maxProb = 0;
+    for (let c = 0; c < numCells; c++) {
+      const ep = totalHits > 0 ? expCounts[c] / totalHits : 0;
+      const tp = theoryVals[c] / theorySum;
+      expProb[c] = ep;
+      theoryProb[c] = tp;
+      if (ep > maxProb) maxProb = ep;
+      if (tp > maxProb) maxProb = tp;
+    }
+    if (maxProb <= 0) return;
+
+    // Draw both distributions
+    for (let c = 0; c < numCells; c++) {
+      const py = c * cellH;
+      
+      // Theory curve (blue, faint)
+      const txWidth = (theoryProb[c] / maxProb) * (ew - 10);
+      ctx.fillStyle = 'rgba(79,195,247,0.4)';
+      ctx.fillRect(ex + 2, py, txWidth, cellH);
+
+      // Experimental data (green, brighter)
+      const exWidth = (expProb[c] / maxProb) * (ew - 10);
+      ctx.fillStyle = 'rgba(102,187,106,0.8)';
+      ctx.fillRect(ex + 2, py, exWidth, cellH);
+    }
+
+    // Draw center line
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(ex, cx);
+    ctx.lineTo(ex + ew, cx);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw legend
+    ctx.font      = '10px sans-serif';
+    ctx.fillStyle = 'rgba(200,200,200,0.8)';
+    ctx.textAlign = 'left';
+    const top     = 8;
+    const lx      = ex + 4;
+    
+    // Theory legend
+    ctx.fillStyle = 'rgba(79,195,247,0.8)';
+    ctx.fillRect(lx, top, 6, 6);
+    ctx.fillStyle = 'rgba(200,200,200,0.8)';
+    ctx.fillText('Theory', lx + 9, top + 6);
+
+    // Experiment legend
+    ctx.fillStyle = 'rgba(102,187,106,0.8)';
+    ctx.fillRect(lx, top + 10, 6, 6);
+    ctx.fillStyle = 'rgba(200,200,200,0.8)';
+    ctx.fillText('Exp.', lx + 9, top + 16);
+
+    // Show particle count and match quality
+    const matchPercent = totalHits > 0
+      ? Math.round(100 * this._evaluateDeviation(expProb, theoryProb))
+      : 0;
+    ctx.font      = '9px sans-serif';
+    ctx.fillStyle = matchPercent > 75 ? 'rgba(76,175,80,0.9)' : 'rgba(255,193,7,0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${matchPercent}%`, ex + ew / 2, H - 12);
+    ctx.fillStyle = 'rgba(150,150,150,0.7)';
+    ctx.fillText('match', ex + ew / 2, H - 3);
+  },
+
+  _evaluateDeviation(expProb, theoryProb) {
+    // Similarity from L1 distance between distributions: 1 - 0.5 * Σ|p-q|
+    let l1 = 0;
+    const n = Math.min(expProb.length, theoryProb.length);
+    for (let i = 0; i < n; i++) {
+      l1 += Math.abs(expProb[i] - theoryProb[i]);
+    }
+    return Math.max(0, 1 - 0.5 * l1);
   },
 };
 
@@ -745,7 +883,7 @@ const App = {
     });
 
     // Overlay checkboxes – just re-render
-    ['showGradient', 'showGraph'].forEach(id => {
+    ['showGradient', 'showGraph', 'showEvaluation'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', () => {
         if (!Sim.running) Sim.render();
       });

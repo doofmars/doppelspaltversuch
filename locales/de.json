@@ -20,6 +20,7 @@
   "overlays": "Überlagerungen",
   "gradient": "Theorie (Gradient)",
   "graph": "Intensitätsgraph",
+  "evaluation": "Auswertung (Experiment vs. Theorie)",
   "sequentialMode": "Sequenziell (ein Teilchen nachdem anderen)",
   "resetScreen": "Schirm löschen",
   "particles": "Teilchen",

@@ -20,6 +20,7 @@
   "overlays": "Overlays",
   "gradient": "Theory (gradient)",
   "graph": "Intensity graph",
+  "evaluation": "Evaluate (Experiment vs. Theory)",
   "sequentialMode": "Sequential (one particle after another)",
   "resetScreen": "Clear screen",
   "particles": "Particles",
