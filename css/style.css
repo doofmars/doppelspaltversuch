@@ -1,0 +1,303 @@
+/* ============================================================
+   Double-Slit Experiment — style.css
+   Tablet-friendly dark theme
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface2:  #1f2937;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --accent2:   #3fb950;
+  --text:      #c9d1d9;
+  --text-muted:#8b949e;
+  --danger:    #f85149;
+  --radius:    8px;
+  --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+
+h1 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: none;
+}
+@media (min-width: 600px) { .subtitle { display: inline; } }
+
+.lang-group { display: flex; gap: 6px; }
+.lang-btn {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.lang-btn:hover  { border-color: var(--accent); color: var(--accent); }
+.lang-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+/* ── App shell ───────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 52px);
+  overflow: hidden;
+}
+
+/* ── Experiment canvas area ──────────────────────────────── */
+#canvas-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  background: #050810;
+}
+
+#experimentCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Canvas overlay labels */
+.canvas-label {
+  position: absolute;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  background: rgba(5,8,16,0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  top: 8px;
+}
+
+/* ── Controls panel ──────────────────────────────────────── */
+#controls {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px 12px 8px;
+  max-height: 46vh;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px 16px;
+}
+
+/* ── Control section ─────────────────────────────────────── */
+.ctrl-section { display: flex; flex-direction: column; gap: 6px; }
+
+.ctrl-section h3 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+/* ── Control row ─────────────────────────────────────────── */
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.ctrl-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  min-width: 82px;
+  flex-shrink: 0;
+}
+
+.ctrl-value {
+  font-size: 0.78rem;
+  color: var(--text);
+  min-width: 64px;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Inputs ──────────────────────────────────────────────── */
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+select {
+  flex: 1;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  outline: none;
+}
+select:focus { border-color: var(--accent); }
+
+/* ── Checkboxes ──────────────────────────────────────────── */
+.ctrl-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text);
+  padding: 3px 0;
+  user-select: none;
+}
+.ctrl-check input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 8px; margin-top: 4px; }
+
+.btn {
+  flex: 1;
+  padding: 8px 6px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary   { background: var(--accent);  color: var(--bg); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-danger    { background: var(--danger);   color: #fff; }
+
+/* ── Info bar ────────────────────────────────────────────── */
+#info-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 12px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+#info-bar .info-particle {
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+#particle-count { margin-left: auto; color: var(--text-muted); }
+
+/* ── Tablet landscape (side controls) ───────────────────── */
+@media (min-width: 768px) and (orientation: landscape),
+       (min-width: 1024px) {
+  #app { flex-direction: row; }
+
+  #canvas-area {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+    border-top: none;
+  }
+
+  #side-panel {
+    flex: 0 0 290px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #controls {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    border-top: none;
+    max-height: none;
+  }
+
+  .controls-grid { grid-template-columns: 1fr; }
+
+  #info-bar {
+    border-top: 1px solid var(--border);
+    border-left: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  #particle-count { margin-left: 0; }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

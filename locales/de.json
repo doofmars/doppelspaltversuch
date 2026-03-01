@@ -1,0 +1,58 @@
+{
+  "title": "Doppelspaltversuch",
+  "subtitle": "Quantenphysik-Simulation",
+  "source": "Quelle",
+  "particleType": "Teilchen",
+  "wavelength": "Wellenlänge λ",
+  "slits": "Spalte",
+  "numSlits": "Anzahl",
+  "slitWidth": "Breite a",
+  "slitSep": "Abstand d",
+  "distances": "Abstände",
+  "sourceDist": "Quelle → Spalt",
+  "screenDist": "Spalt → Schirm",
+  "simulation": "Simulation",
+  "speed": "Geschwindigkeit",
+  "density": "Emission",
+  "play": "▶ Start",
+  "pause": "⏸ Pause",
+  "reset": "↺ Reset",
+  "overlays": "Überlagerungen",
+  "gradient": "Theorie (Gradient)",
+  "graph": "Intensitätsgraph",
+  "resetScreen": "Schirm löschen",
+  "particles": "Teilchen",
+  "particleTypes": {
+    "photon": "Photon",
+    "electron": "Elektron",
+    "proton": "Proton",
+    "neutron": "Neutron",
+    "atom": "Atom (He)",
+    "ball": "Ball",
+    "paint": "Farbspray"
+  },
+  "units": {
+    "photon":   { "lambda": "nm", "d": "μm", "a": "μm", "L1": "cm", "L2": "cm" },
+    "electron": { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "proton":   { "lambda": "fm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "neutron":  { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "atom":     { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "ball":     { "lambda": "—",  "d": "mm", "a": "mm", "L1": "cm", "L2": "cm" },
+    "paint":    { "lambda": "—",  "d": "mm", "a": "mm", "L1": "cm", "L2": "cm" }
+  },
+  "labels": {
+    "source": "Quelle",
+    "slits": "Spalte",
+    "screen": "Schirm",
+    "classical": "klassisch (keine Interferenz)"
+  },
+  "info": {
+    "photon":   "Elektromagnetische Welle / Teilchen — Interferenz immer sichtbar",
+    "electron": "Materiewelle — de-Broglie-Wellenlänge λ = h/p",
+    "proton":   "Schwerer als Elektron — kürzere Wellenlänge",
+    "neutron":  "Neutrales Teilchen — Beugung an Kristallgittern",
+    "atom":     "Heliumatom — quantenmechanisches Wellenverhalten",
+    "ball":     "Klassisches Teilchen — keine Beugung, geometrischer Schatten",
+    "paint":    "Viele klassische Teilchen — zeigt zwei Streifen"
+  }
+}

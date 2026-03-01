@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="Interaktive Simulation des Doppelspaltversuchs / Interactive double-slit experiment simulation">
+  <title>Doppelspaltversuch</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1 data-i18n="title">Doppelspaltversuch</h1>
+    <span class="subtitle" data-i18n="subtitle">Quantenphysik-Simulation</span>
+  </div>
+  <div class="lang-group">
+    <button class="lang-btn" data-lang="de">DE</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+</header>
+
+<div id="app">
+
+  <!-- ── Experiment canvas ──────────────────────────────── -->
+  <div id="canvas-area">
+    <canvas id="experimentCanvas"></canvas>
+  </div>
+
+  <!-- ── Side / bottom panel ───────────────────────────── -->
+  <div id="side-panel">
+
+    <div id="controls">
+      <div class="controls-grid">
+
+        <!-- Source -->
+        <div class="ctrl-section">
+          <h3 data-i18n="source">Quelle</h3>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="particleType">Teilchen</span>
+            <select id="particleType">
+              <option value="photon"   data-i18n="particleTypes.photon">Photon</option>
+              <option value="electron" data-i18n="particleTypes.electron" selected>Elektron</option>
+              <option value="proton"   data-i18n="particleTypes.proton">Proton</option>
+              <option value="neutron"  data-i18n="particleTypes.neutron">Neutron</option>
+              <option value="atom"     data-i18n="particleTypes.atom">Atom (He)</option>
+              <option value="ball"     data-i18n="particleTypes.ball">Ball</option>
+              <option value="paint"    data-i18n="particleTypes.paint">Farbspray</option>
+            </select>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="wavelength">Wellenlänge λ</span>
+            <input type="range" id="wavelength" min="1" max="80" value="25">
+            <span class="ctrl-value" id="wavelengthVal">25 pm</span>
+          </div>
+        </div>
+
+        <!-- Slits -->
+        <div class="ctrl-section">
+          <h3 data-i18n="slits">Spalte</h3>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="numSlits">Anzahl</span>
+            <input type="range" id="numSlits" min="1" max="5" value="2" step="1">
+            <span class="ctrl-value" id="numSlitsVal">2</span>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="slitWidth">Breite a</span>
+            <input type="range" id="slitWidth" min="5" max="80" value="20">
+            <span class="ctrl-value" id="slitWidthVal">20 nm</span>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="slitSep">Abstand d</span>
+            <input type="range" id="slitSep" min="15" max="160" value="70">
+            <span class="ctrl-value" id="slitSepVal">70 nm</span>
+          </div>
+        </div>
+
+        <!-- Distances -->
+        <div class="ctrl-section">
+          <h3 data-i18n="distances">Abstände</h3>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="sourceDist">Quelle → Spalt</span>
+            <input type="range" id="sourceDist" min="10" max="100" value="50">
+            <span class="ctrl-value" id="sourceDistVal">50 mm</span>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="screenDist">Spalt → Schirm</span>
+            <input type="range" id="screenDist" min="10" max="100" value="55">
+            <span class="ctrl-value" id="screenDistVal">55 mm</span>
+          </div>
+        </div>
+
+        <!-- Simulation -->
+        <div class="ctrl-section">
+          <h3 data-i18n="simulation">Simulation</h3>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="speed">Geschwindigkeit</span>
+            <input type="range" id="simSpeed" min="1" max="10" value="5">
+            <span class="ctrl-value" id="simSpeedVal">5</span>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="ctrl-label" data-i18n="density">Emission</span>
+            <input type="range" id="simDensity" min="1" max="10" value="5">
+            <span class="ctrl-value" id="simDensityVal">5</span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary"   id="btnPlay"        data-i18n="play">▶ Start</button>
+            <button class="btn btn-secondary" id="btnReset"       data-i18n="reset">↺ Reset</button>
+          </div>
+        </div>
+
+        <!-- Overlays -->
+        <div class="ctrl-section">
+          <h3 data-i18n="overlays">Überlagerungen</h3>
+
+          <label class="ctrl-check">
+            <input type="checkbox" id="showGradient">
+            <span data-i18n="gradient">Theorie (Gradient)</span>
+          </label>
+
+          <label class="ctrl-check">
+            <input type="checkbox" id="showGraph">
+            <span data-i18n="graph">Intensitätsgraph</span>
+          </label>
+
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn btn-danger" id="btnResetScreen" data-i18n="resetScreen">Schirm löschen</button>
+          </div>
+        </div>
+
+      </div><!-- /controls-grid -->
+    </div><!-- /controls -->
+
+    <!-- Info bar -->
+    <div id="info-bar">
+      <span id="particleInfo"></span>
+      <span id="particle-count">Teilchen: 0</span>
+    </div>
+
+  </div><!-- /side-panel -->
+
+</div><!-- /app -->
+
+<script src="js/app.js"></script>
+</body>
+</html>

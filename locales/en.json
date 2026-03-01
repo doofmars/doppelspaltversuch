@@ -1,0 +1,58 @@
+{
+  "title": "Double-Slit Experiment",
+  "subtitle": "Quantum Physics Simulation",
+  "source": "Source",
+  "particleType": "Particle",
+  "wavelength": "Wavelength λ",
+  "slits": "Slits",
+  "numSlits": "Number",
+  "slitWidth": "Width a",
+  "slitSep": "Separation d",
+  "distances": "Distances",
+  "sourceDist": "Source → Slit",
+  "screenDist": "Slit → Screen",
+  "simulation": "Simulation",
+  "speed": "Speed",
+  "density": "Emission",
+  "play": "▶ Start",
+  "pause": "⏸ Pause",
+  "reset": "↺ Reset",
+  "overlays": "Overlays",
+  "gradient": "Theory (gradient)",
+  "graph": "Intensity graph",
+  "resetScreen": "Clear screen",
+  "particles": "Particles",
+  "particleTypes": {
+    "photon": "Photon",
+    "electron": "Electron",
+    "proton": "Proton",
+    "neutron": "Neutron",
+    "atom": "Atom (He)",
+    "ball": "Ball",
+    "paint": "Paint spray"
+  },
+  "units": {
+    "photon":   { "lambda": "nm", "d": "μm", "a": "μm", "L1": "cm", "L2": "cm" },
+    "electron": { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "proton":   { "lambda": "fm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "neutron":  { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "atom":     { "lambda": "pm", "d": "nm", "a": "nm", "L1": "mm", "L2": "mm" },
+    "ball":     { "lambda": "—",  "d": "mm", "a": "mm", "L1": "cm", "L2": "cm" },
+    "paint":    { "lambda": "—",  "d": "mm", "a": "mm", "L1": "cm", "L2": "cm" }
+  },
+  "labels": {
+    "source": "Source",
+    "slits": "Slits",
+    "screen": "Screen",
+    "classical": "classical (no interference)"
+  },
+  "info": {
+    "photon":   "Electromagnetic wave / particle — interference always visible",
+    "electron": "Matter wave — de Broglie wavelength λ = h/p",
+    "proton":   "Heavier than electron — shorter wavelength",
+    "neutron":  "Neutral particle — diffraction from crystal lattices",
+    "atom":     "Helium atom — quantum wave behaviour",
+    "ball":     "Classical particle — no diffraction, geometric shadow",
+    "paint":    "Many classical particles — shows two bands"
+  }
+}
