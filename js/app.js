@@ -10,7 +10,7 @@
 const SUPPORTED_LANGS  = ['de', 'en'];
 const MAX_HITS         = 50000; // cap stored hits to prevent memory issues
 const HITS_TRIM        = 5000;  // how many to remove when cap is reached
-const GLOW_ALPHA       = 0x55;  // outer glow transparency (0–255)
+const GLOW_ALPHA       = 0x2A;  // outer glow transparency (0–255)
 const CORE_ALPHA       = 0xFF;  // bright core transparency (0–255)
 const INTENSITY_SCALE  = 2.0;   // multiplier for screen brightness (>1 = brighter)
 const SCREEN_WIDTH     = 20;    // visual width of the screen bar in pixels
@@ -513,9 +513,9 @@ const Sim = {
         // Doubled intensity: sqrt-scale then multiply by INTENSITY_SCALE, clamped to 1
         const alpha = Math.min(Math.pow(counts[c] / maxCount, 0.5) * INTENSITY_SCALE, 1.0);
         const py    = c * cellH;
-        // Soft glow halo (wider than before)
+        // Softer and narrower halo to avoid visible bleed artifacts
         ctx.fillStyle = col + Math.round(alpha * GLOW_ALPHA).toString(16).padStart(2, '0');
-        ctx.fillRect(x - 12, py, sw + 24, cellH);
+        ctx.fillRect(x - 6, py, sw + 12, cellH);
         // Bright core
         ctx.fillStyle = col + Math.round(alpha * CORE_ALPHA).toString(16).padStart(2, '0');
         ctx.fillRect(x, py, sw, cellH);
