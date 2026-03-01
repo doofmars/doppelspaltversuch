@@ -270,7 +270,6 @@ select:focus { border-color: var(--accent); }
   }
 
   #side-panel {
-    flex: 0 0 290px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
