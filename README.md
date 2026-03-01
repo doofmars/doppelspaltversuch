@@ -2,6 +2,8 @@
 
 > An interactive web-based simulation of the famous double-slit experiment, demonstrating quantum mechanical principles and the wave-particle duality of light and matter.
 
+[![sample.png](sample.png)](https://doofmars.github.io/doppelspaltversuch/)
+
 ## Overview
 
 The double-slit experiment is a fundamental demonstration in quantum mechanics that reveals the strange behavior of particles at the quantum scale.
