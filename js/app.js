@@ -204,6 +204,10 @@ const Sim = {
   get L()       { return this.screenX - this.slitX; },
   get centerY() { return Math.round(this.canvas.height / 2); },
 
+  clampToScreenY(y) {
+    return Math.max(1, Math.min(this.canvas.height - 2, y));
+  },
+
   slitCentres() {
     const { numSlits, slitSep } = this.params;
     const cy = this.centerY;
@@ -218,7 +222,7 @@ const Sim = {
     const { numSlits, slitWidth, slitSep, lambda } = this.params;
     const pt      = PARTICLES[this.params.particleType];
     const classic = pt.classical || lambda <= 0;
-    const half    = this.canvas.height * 0.6;
+    const half    = Math.max(1, this.canvas.height / 2 - 2);
     // Slit centres relative to canvas centre (needed for classical Gaussian CDF)
     const slitCentresRel = this.slitCentres().map(sc => sc - this.centerY);
     this.cdfData  = Physics.buildCDF(
@@ -316,8 +320,8 @@ const Sim = {
       // Classical geometric projection: particle travels straight through the slit
       // Landing position ≈ slit position + small divergence spread
       const screenY = inSlit
-        ? slitY + (Math.random() - 0.5) * slitWidth * 1.5
-        : slitY; // will be blocked at slit plane anyway
+        ? this.clampToScreenY(slitY + (Math.random() - 0.5) * slitWidth * 1.5)
+        : this.clampToScreenY(slitY); // will be blocked at slit plane anyway
 
       this.particles.push({
         x: this.sourceX,
@@ -332,7 +336,7 @@ const Sim = {
       });
     } else {
       // Quantum: sample landing position from interference pattern
-      const landY = this.centerY + Physics.sample(this.cdfData);
+      const landY = this.clampToScreenY(this.centerY + Physics.sample(this.cdfData));
       // Visually route through a random slit (superposition)
       const slitY = centres[Math.floor(Math.random() * centres.length)]
                     + (Math.random() - 0.5) * slitWidth * 0.6;
