@@ -178,8 +178,9 @@ const Sim = {
     sourceFrac: 0.28, // slit x as fraction of canvas width from source
     screenFrac: 0.42, // screen x relative to slit
     particleType: 'electron',
-    speed:      5,    // 1-10  (animation / movement speed)
+    speed:      5,    // 1-25  (animation / movement speed)
     density:    5,    // 1-10  (emission rate, particles per second)
+    sequential: false, // emit one particle at a time
   },
 
   init(canvas) {
@@ -230,6 +231,7 @@ const Sim = {
   start() {
     if (this.running) return;
     this.running = true;
+    this._sequentialReady = true; // ensure ready for sequential mode
     this._loop();
   },
 
@@ -248,6 +250,7 @@ const Sim = {
     this.hits      = [];
     this.hitCount  = 0;
     this.dirty     = true;
+    this._sequentialReady = true; // reset sequential flag
     this.render();
     App.updateParticleCount();
   },
@@ -264,11 +267,19 @@ const Sim = {
     if (this.dirty) this.rebuildCDF();
 
     // Sub-integer emission via accumulator so density=1 emits ~3 particles/sec
-    this._emitAccum = (this._emitAccum || 0)
-      + (this.params.density * this.params.density) * 0.05;
-    const pps = Math.floor(this._emitAccum);
-    this._emitAccum -= pps;
-    for (let i = 0; i < pps; i++) this._spawn();
+    if (!this.params.sequential) {
+      this._emitAccum = (this._emitAccum || 0)
+        + (this.params.density * this.params.density) * 0.05;
+      const pps = Math.floor(this._emitAccum);
+      this._emitAccum -= pps;
+      for (let i = 0; i < pps; i++) this._spawn();
+    } else {
+      // Sequential mode: emit only if no particles are active
+      if (this._sequentialReady && this.particles.length === 0) {
+        this._spawn();
+        this._sequentialReady = false;
+      }
+    }
 
     this._update();
     this.render();
@@ -367,6 +378,10 @@ const Sim = {
           if (this.hits.length > MAX_HITS) this.hits.splice(0, HITS_TRIM);
           this.hitCount++;
           p.alive = false;
+          // In sequential mode, mark ready to emit next particle
+          if (this.params.sequential) {
+            this._sequentialReady = true;
+          }
           continue;
         }
       } else {
@@ -720,6 +735,14 @@ const App = {
         if (!Sim.running) Sim.render();
       });
     }
+
+    // Sequential mode checkbox
+    document.getElementById('sequentialMode').addEventListener('change', e => {
+      Sim.params.sequential = e.target.checked;
+      const densitySlider = document.getElementById('simDensity');
+      densitySlider.disabled = e.target.checked;
+      this.updateAllDisplays();
+    });
 
     // Overlay checkboxes – just re-render
     ['showGradient', 'showGraph'].forEach(id => {

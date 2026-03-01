@@ -184,6 +184,18 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   border: 2px solid var(--bg);
 }
+input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+input[type="range"]:disabled::-webkit-slider-thumb {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+input[type="range"]:disabled::-moz-range-thumb {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
 
 select {
   flex: 1;
